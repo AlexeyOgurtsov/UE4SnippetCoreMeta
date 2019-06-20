@@ -18,7 +18,7 @@ namespace
 				return F->GetFName() == InName; 
 			}
 		);
-		if(nullptr) 
+		if(nullptr == ppField) 
 		{
 			return nullptr;
 		}
@@ -31,7 +31,11 @@ void FFieldUtilsArrayTestBase::CheckField(FName InName)
 	M_LOGFUNC_MSG(TEXT("Checking expected field with name \"%s\""), *InName.ToString());
 	checkNoRecursion();
 
-	const UField* const F = FindFieldWithName(Fields, InName);
+	const UField* F;
+	{
+		M_LOGBLOCK(TEXT("FindFieldWithName"));
+		F = FindFieldWithName(Fields, InName);
+	}
 	TestNotNull(FString::Printf(TEXT("Field with name \"%s\" is expected to be included"), *InName.ToString()), F);
 }
 

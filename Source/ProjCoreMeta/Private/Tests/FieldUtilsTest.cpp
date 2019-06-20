@@ -21,7 +21,7 @@ namespace FieldUtilsTest
 			int32 FieldIndex = 0;
 			for(UField* ExpectedField : TFieldRange<UField>(InStruct))
 			{
-				if(Cast<const UFunction>(ExpectedField))			
+				if(nullptr == Cast<const UFunction>(ExpectedField))			
 				{
 					M_LOGFUNC_MSG(TEXT("Checking expected field N %d: {%s}"), FieldIndex, *FProtoFieldUtils::GetFieldString(ExpectedField));									
 					CheckField(ExpectedField->GetFName());

@@ -7,9 +7,9 @@ FString FProtoFieldUtils::GetFieldString(const UField* InField, EFieldStringFlag
 
 	if((InFlags & EFieldStringFlags::ExcludeOwner) == EFieldStringFlags::None)
 	{
-		Result.Append(TEXT("OwnerStruct="));		
+		Result.Append(TEXT("OwnerStruct={"));		
 		Result.Append(ULogUtilLib::GetNameAndClassSafe(InField->GetOwnerStruct()));	
-		Result.Append(TEXT("; "));		
+		Result.Append(TEXT("}; "));		
 	}
 
 	Result.Append(ULogUtilLib::GetNameAndClassSafe(InField));
@@ -39,14 +39,17 @@ TSet<UField*> FProtoFieldUtils::GetFieldsRecursive(const UStruct* const InStruct
 				continue;
 			}
 
-			bool bShouldAddField = false;
 			if(UFunction* FuncField = Cast<UFunction>(F))
 			{
 				M_LOG_IF_FLAGS(InLogFlags, TEXT("UStruct {%s}: Skipping ufunction"), *GetFieldString(F));	
 				continue;
 			}
-			if(UStruct* StructField = Cast<UStruct>(F))
+
+			bool bShouldAddField;
+			if(UStructProperty* StructProperty = Cast<UStructProperty>(F))
 			{
+				UStruct* StructField = StructProperty->Struct;
+
 				StructsToVisit.Add(StructField);
 				bool bIncludeComposite = (EFieldIterationFlags::None != (InFieldIterationFlags & EFieldIterationFlags::IncludeComposite));
 				if(bIncludeComposite)
