@@ -2,8 +2,10 @@
 
 #include "Misc/AutomationTest.h"
 
-class FFieldUtilsTestBase : public FAuomationTestBase
+class FFieldUtilsTestBase : public FAutomationTestBase
 {
 public:
 	FFieldUtilsTestBase(const FString& InName, bool const bComplexTask);
+
+protected:
 };

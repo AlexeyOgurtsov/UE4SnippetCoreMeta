@@ -8,5 +8,9 @@ public:
 	FFieldUtilsArrayTestBase(const FString& InName, bool const bComplexTask);
 
 protected:
-	TArray<UField*> Array;
+	void AssignFields(const TSet<UField*>& InFields);
+
+	TArray<UField*> Fields;
+
+	void CheckField(FName InName);
 };
