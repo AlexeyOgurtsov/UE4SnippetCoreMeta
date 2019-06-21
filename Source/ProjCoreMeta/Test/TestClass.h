@@ -9,6 +9,8 @@ class UTestClass : public UTestBaseClass
 	GENERATED_BODY()
 
 public:
+	UTestClass();
+
 	virtual FString TestNativeCall_Implementation(FName InName) const override;
 
 	UFUNCTION(BlueprintPure, Category = TestClass)

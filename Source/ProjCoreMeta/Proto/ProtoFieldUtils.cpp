@@ -17,6 +17,32 @@ FString FProtoFieldUtils::GetFieldString(const UField* InField, EFieldStringFlag
 	return Result;
 }
 
+UStruct* FProtoFieldUtils::GetStructFromField(UField* InField, const void* InContainer)
+{
+	if(UStruct* Struct = Cast<UStruct>(InField))
+	{
+		return Struct;	
+	}
+
+	if(UStructProperty* StructProperty = Cast<UStructProperty>(InField))
+	{
+		return StructProperty->Struct;
+	}
+
+	if(UObjectPropertyBase* ObjectProperty = Cast<UObjectPropertyBase>(InField))
+	{
+		return GetPropertyValueRuntimeClass(ObjectProperty, InContainer);
+
+	}
+
+	if(UInterfaceProperty* InterfaceProperty = Cast<UInterfaceProperty>(InField))
+	{
+		return GetPropertyValueRuntimeClass(InterfaceProperty, InContainer);
+	}
+
+	return nullptr;
+}
+
 TSet<UField*> FProtoFieldUtils::GetFieldsRecursive(const UStruct* const InStruct, ELogFlags InLogFlags, EFieldIterationFlags InFieldIterationFlags)
 {
 	M_LOGFUNC_IF_FLAGS(InLogFlags);

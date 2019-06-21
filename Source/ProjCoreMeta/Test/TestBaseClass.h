@@ -27,7 +27,6 @@ class UTestBaseClass
 {
 	GENERATED_BODY()
 
-
 	UFUNCTION(BlueprintPure)
 	int32 GetBaseInt32() const { return BaseInt32; }
 
@@ -41,6 +40,8 @@ class UTestBaseClass
 	FTestStruct GetBaseTestStruct() const { return BaseTestStruct; }
 
 public:
+	UTestBaseClass();
+
 	virtual FString TestNativeCall_Implementation(FName InName) const override;
 
 	UFUNCTION(BlueprintPure, Category = BaseClass)

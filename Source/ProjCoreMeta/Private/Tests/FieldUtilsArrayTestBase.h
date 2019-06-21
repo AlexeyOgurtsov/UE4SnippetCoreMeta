@@ -13,4 +13,5 @@ protected:
 	TArray<UField*> Fields;
 
 	void CheckField(FName InName);
+	void CheckFieldsIncluded(const UStruct* InStruct);
 };
