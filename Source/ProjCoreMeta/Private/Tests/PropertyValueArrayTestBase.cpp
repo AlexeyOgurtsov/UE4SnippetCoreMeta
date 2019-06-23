@@ -1,4 +1,5 @@
 #include "PropertyValueArrayTestBase.h"
+#include "Proto/ProtoFieldUtils.h"
 #include "Util/Core/LogUtilLib.h"
 
 FPropertyValueArrayTestBase::FPropertyValueArrayTestBase(const FString& InName, bool const bComplexTask) :
@@ -6,12 +7,26 @@ FPropertyValueArrayTestBase::FPropertyValueArrayTestBase(const FString& InName, 
 {
 }
 
-void FPropertyValueArrayTestBase::CheckField(const UField* InExpectedField, const void* InContainer)
+void FPropertyValueArrayTestBase::CheckIncluded(const UProperty* InExpectedProperty, const void* InContainer)
 {
-	M_NOT_IMPL();
+	int32 Index;
+	bool const bPropFound = FProtoFieldUtils::FindPropertyValue(PropertyValues, InExpectedProperty, InContainer, Index);
+	TestTrue(FString::Printf(TEXT("Property {%s} is expected"), *FProtoFieldUtils::GetFieldString(InExpectedProperty)), bPropFound);
 }
 
-void FPropertyValueArrayTestBase::CheckFieldsIncluded(const UStruct* InStruct, const void* InContainer)
+void FPropertyValueArrayTestBase::CheckPropertiesIncluded(const UStruct* InStruct, const void* InContainer, EFieldIterationFlags InFlags)
 {
-	M_NOT_IMPL();
+	if(InContainer == nullptr)
+	{
+		M_LOG(TEXT("{%s}: Test is passed: container is nullptr"), *FProtoFieldUtils::GetFieldStringSafe(InStruct));
+		return;
+	}	
+
+	for(UProperty* ExpectedProperty : TFieldRange<UProperty>(InStruct))
+	{
+		if(FProtoFieldUtils::IsRelevantField(ExpectedProperty, InFlags, ELogFlags::LogEverSuccess))	
+		{
+			CheckIncluded(ExpectedProperty, InContainer);
+		}
+	}
 }

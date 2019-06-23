@@ -27,6 +27,7 @@ class UTestBaseClass
 {
 	GENERATED_BODY()
 
+public:
 	UFUNCTION(BlueprintPure)
 	int32 GetBaseInt32() const { return BaseInt32; }
 

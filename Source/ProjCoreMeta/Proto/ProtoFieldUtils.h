@@ -66,9 +66,23 @@ class FProtoFieldUtils
 {
 public:
 	/**
+	* Checks whether we should include field when traversing/iterating based on the flags.
+	*/
+	static bool IsRelevantField(UField* InField, EFieldIterationFlags InFlags, ELogFlags InLogFlags);
+
+	/**
+	* Searches for the given Property value inside the given array.
+	*
+	* @returns: true if found, false otherwise;
+	* @param OutPropertyValueIndex: index of value in the array (valid only if the function returned true);
+	*/
+	static bool FindPropertyValue(const TArray<FPropertyValue>& InArray, const UProperty* InProperty, const void *InContainer, int32& OutPropertyValueIndex);
+
+	/**
 	* Returns field string representation.
 	*/
 	static FString GetFieldString(const UField* InField, EFieldStringFlags InFlags = EFieldStringFlags::None);
+	static FString GetFieldStringSafe(const UField* InField, EFieldStringFlags InFlags = EFieldStringFlags::None);
 
 	/**
 	* Returns most-actual dynamic pointer to UStruct.
@@ -117,15 +131,15 @@ public:
 	* @param   Func          Func taking UField* and returning EFieldTraverseFunctionResult
 	*/
 	template<typename FuncType>
-	static TSet<UField*> TraverseFields
+	static TSet<FPropertyValue> TraverseFields
 	(
 		const UField* InRootField, void* InContainer, FuncType Func,
 		ELogFlags InLogFlags = ELogFlags::None, EFieldIterationFlags InFieldIterationFlags = EFieldIterationFlags::IncludeComposite	
 	)
 	{
-		TSet<UField*> ResultFields;
+		TSet<FPropertyValue> TraversedProps;
 		M_NOT_IMPL();
-		return ResultFields;
+		return TraversedProps;
 	}
 
 	static EFieldTraverseFunctionResult TraverseFunc_SkipSubtree(const UField* InField) { return EFieldTraverseFunctionResult::SkipSubtree; }

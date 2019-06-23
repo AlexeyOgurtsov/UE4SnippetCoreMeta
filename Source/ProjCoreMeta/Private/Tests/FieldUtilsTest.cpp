@@ -3,6 +3,7 @@
 #include "Test/TestClass.h"
 #include "Util/Core/LogUtilLib.h"
 #include "FieldUtilsArrayTestBase.h"
+#include "PropertyValueArrayTestBase.h"
 #include "FieldUtilsTestUtils.h"
 
 
@@ -17,11 +18,11 @@ namespace FieldUtilsTest
 		}
 	};
 
-	class FTestBase_TraverseFields : public FFieldUtilsArrayTestBase
+	class FTestBase_TraverseFields : public FPropertyValueArrayTestBase
 	{
 	public:
 		FTestBase_TraverseFields(const FString& InName, bool const bComplexTask)
-		: FFieldUtilsArrayTestBase(InName, bComplexTask)
+		: FPropertyValueArrayTestBase(InName, bComplexTask)
 		{
 			PropHolder.Initialize(Cast<UObject>(GetTransientPackage()));
 		} 
@@ -31,20 +32,20 @@ namespace FieldUtilsTest
 		/**
 		* Traverse the given property field and check it's included.
 		*/
-		void TraverseCheckSingle(UField* InField, void* InContainer)
+		void TraverseCheckSingle(UProperty* InProperty, void* InContainer)
 		{
-			check(InField);
-			TraverseTopFields(InField, InContainer);
-			CheckField(InField->GetFName());
+			check(InProperty);
+			TraverseTopFields(InProperty, InContainer);
+			CheckIncluded(InProperty, InContainer);
 		}
 
-		void TraverseCheckRootStruct(UField* InField, void* InContainer, EFieldIterationFlags InFieldIterationFlags = EFieldIterationFlags::IncludeComposite)
+		void TraverseCheckRootStruct(UProperty* InProperty, void* InContainer, EFieldIterationFlags InFieldIterationFlags = EFieldIterationFlags::IncludeComposite)
 		{
-			check(InField);
+			check(InProperty);
 			check(InContainer);
 
-			TraverseTopFields(InField, InContainer, InFieldIterationFlags);
-			CheckFieldsIncluded(FProtoFieldUtils::GetStructFromField(InField, InContainer));
+			TraverseTopFields(InProperty, InContainer, InFieldIterationFlags);
+			CheckPropertiesIncluded(FProtoFieldUtils::GetStructFromField(InProperty, InContainer), InContainer);
 		}
 		// ~Checks End
 
@@ -74,8 +75,8 @@ namespace FieldUtilsTest
 			EFieldIterationFlags InFieldIterationFlags = EFieldIterationFlags::IncludeComposite	
 		)
 		{
-			TSet<UField*> const FieldSet = FProtoFieldUtils::TraverseFields(InRootField, InContainer, Func, ELogFlags::LogEverSuccess, InFieldIterationFlags);
-			AssignFields(FieldSet);
+			TSet<FPropertyValue> const PropertySet = FProtoFieldUtils::TraverseFields(InRootField, InContainer, Func, ELogFlags::LogEverSuccess, InFieldIterationFlags);
+			PropertyValues = PropertySet.Array();
 		}
 		// ~Traverse helpers End
 
@@ -86,6 +87,7 @@ namespace FieldUtilsTest
 		UStructProperty* GetProp_Struct() const { return PropHolder.GetProp_Struct(); }
 		UObjectProperty* GetProp_Obj() const { return PropHolder.GetProp_Obj(); }
 		UObject* GetObj() const { return PropHolder.GetObj(); }
+		FTestStruct GetStruct() const { return PropHolder.GetStruct(); }
 		// ~Testee stuff End
 
 
@@ -116,8 +118,8 @@ bool FPropertyFieldUtils_TraverseFields_RootStructProperty::RunTest(const FStrin
 {
 	M_LOGFUNC();
 
-	TraverseCheckRootStruct(GetProp_Struct(), GetObj());
-	TraverseCheckRootStruct(GetProp_Obj(), GetObj());
+	TraverseCheckRootStruct(GetProp_Struct(), &GetPropHolder());
+	TraverseCheckRootStruct(GetProp_Obj(), &GetPropHolder());
 	
 	return true;
 }
@@ -128,14 +130,14 @@ bool FPropertyFieldUtils_TraverseFields_ClassProperty::RunTest(const FString& Pa
 
 	TraverseFieldsRecursive
 	(
-		GetProp_Obj(), GetObj(), EFieldIterationFlags::IncludeComposite
+		GetProp_Obj(), &GetPropHolder(), EFieldIterationFlags::IncludeComposite
 	);
 
-	CheckFieldsIncluded(GetProp_Obj()->GetOwnerClass());
-	CheckFieldsIncluded(GetProp_Struct()->GetOwnerStruct());
-	CheckFieldsIncluded(UObject::StaticClass());
-	CheckFieldsIncluded(AActor::StaticClass());
-	CheckFieldsIncluded(UMyTestInterfaceInstance::StaticClass());
+	CheckObjectPropertiesIncluded(GetObj());
+	const FTestStruct S = GetStruct();
+	CheckStructPropertiesIncluded(&S);
+	M_TO_BE_IMPL(TEXT("Check interface"));
+	M_TO_BE_IMPL(TEXT("Check many objects"));
 
 	return true;
 }

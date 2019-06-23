@@ -17,6 +17,22 @@ FString FProtoFieldUtils::GetFieldString(const UField* InField, EFieldStringFlag
 	return Result;
 }
 
+FString FProtoFieldUtils::GetFieldStringSafe(const UField* InField, EFieldStringFlags InFlags)
+{
+	if(InField == nullptr)
+	{
+		return FString(TEXT("{nullptr}"));
+	}
+	return GetFieldString(InField, InFlags);
+}
+bool FProtoFieldUtils::FindPropertyValue(const TArray<FPropertyValue>& InArray, const UProperty* InProperty, const void *InContainer, int32& OutPropertyValueIndex)
+{
+	check(InProperty);
+	check(InContainer);
+	bool const bFound = InArray.Find(FPropertyValue{const_cast<UProperty*>(InProperty), const_cast<void*>(InContainer)}, OutPropertyValueIndex);
+	return bFound;
+}
+
 UStruct* FProtoFieldUtils::GetStructFromField(UField* InField, const void* InContainer)
 {
 	if(UStruct* Struct = Cast<UStruct>(InField))
@@ -43,6 +59,29 @@ UStruct* FProtoFieldUtils::GetStructFromField(UField* InField, const void* InCon
 	return nullptr;
 }
 
+bool FProtoFieldUtils::IsRelevantField(UField* InField, EFieldIterationFlags InFlags, ELogFlags InLogFlags)
+{
+	bool const bIncludeComposite = ((InFlags & EFieldIterationFlags::IncludeComposite) != EFieldIterationFlags::None);
+	if(UFunction* FuncField = Cast<UFunction>(InField))
+	{
+		if((InFlags & EFieldIterationFlags::IncludeFunction) == EFieldIterationFlags::None)
+		{
+			M_LOG_IF_FLAGS(InLogFlags, TEXT("{%s}: Skipping ufunction (include function flag is NOT set)"), *GetFieldString(InField));	
+			return false;
+		}
+	}
+	else if(UStructProperty* StructProperty = Cast<UStructProperty>(InField))
+	{
+		if(bIncludeComposite)
+		{
+			M_LOG_IF_FLAGS(InLogFlags, TEXT("{%s}: Skipping struct property (include composite flag is NOT set)"), *GetFieldString(InField));	
+			return false;
+		}
+	}
+
+	return true;
+}
+
 TSet<UField*> FProtoFieldUtils::GetFieldsRecursive(const UStruct* const InStruct, ELogFlags InLogFlags, EFieldIterationFlags InFieldIterationFlags)
 {
 	M_LOGFUNC_IF_FLAGS(InLogFlags);
@@ -65,31 +104,15 @@ TSet<UField*> FProtoFieldUtils::GetFieldsRecursive(const UStruct* const InStruct
 				continue;
 			}
 
-			if(UFunction* FuncField = Cast<UFunction>(F))
-			{
-				M_LOG_IF_FLAGS(InLogFlags, TEXT("UStruct {%s}: Skipping ufunction"), *GetFieldString(F));	
-				continue;
-			}
-
-			bool bShouldAddField;
 			if(UStructProperty* StructProperty = Cast<UStructProperty>(F))
 			{
 				UStruct* StructField = StructProperty->Struct;
 
 				StructsToVisit.Add(StructField);
-				bool bIncludeComposite = (EFieldIterationFlags::None != (InFieldIterationFlags & EFieldIterationFlags::IncludeComposite));
-				if(bIncludeComposite)
-				{
-					M_LOG_IF_FLAGS(InLogFlags, TEXT("UStruct {%s}: Include composite flag is enabled for UStruct field"), *GetFieldString(F));
-				}
-				bShouldAddField = bIncludeComposite;
-			}
-			else
-			{
-				bShouldAddField = true;
+
 			}
 
-			if(bShouldAddField)
+			if(IsRelevantField(F, InFieldIterationFlags, InLogFlags))
 			{
 				M_LOG_IF_FLAGS(InLogFlags, TEXT("Adding field {%s}"), *GetFieldString(F));
 				Fields.Add(F);

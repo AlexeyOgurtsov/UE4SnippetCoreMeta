@@ -35,6 +35,10 @@ struct FTestPropHolder
 		static const FName PropName(TEXT("BaseTestStruct"), FNAME_Find);
 		return CastChecked<UStructProperty>(UTestClass::StaticClass()->FindPropertyByName(PropName)); 
 	}
+	FTestStruct GetStruct() const
+	{
+		return GetTestClass()->GetBaseTestStruct();
+	}
 
 	UInterfaceProperty* GetProp_Interface() const
 	{
@@ -44,11 +48,12 @@ struct FTestPropHolder
 
 	bool GetBool() const { return Prop_Bool; }
 	UObject* GetObj() const { return Prop_Obj; }
+	UTestClass* GetTestClass() const { return Prop_Obj; }
 
 private:
 	UPROPERTY() 
 	bool Prop_Bool = false;
 
 	UPROPERTY()
-	UObject* Prop_Obj = nullptr;
+	UTestClass* Prop_Obj = nullptr;
 };
