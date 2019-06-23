@@ -3,6 +3,8 @@
 #include "Util/Core/Log/MyLoggingTypes.h"
 #include "Util/Core/LogUtilLib.h"
 
+#include "Misc/Crc.h"
+
 class UField;
 class UStruct;
 
@@ -30,6 +32,35 @@ enum class EFieldTraverseFunctionResult : uint8
 	TraverseSubtree = 1 UMETA(DisplayName="Traverse subtree"), // We should traverse the subtree rooted from this field
 	SkipSubtree = 2 UMETA(DisplayName="Skip subtree"), // We should skip this subtree but continue the traverse
 };
+
+struct FPropertyValue
+{
+	UProperty* Prop = nullptr;
+	void* Container = nullptr;
+
+	FPropertyValue(UProperty* InProp, void* InContainer) 
+	: Prop{InProp}
+	, Container{InContainer}
+	{
+		check(Prop);
+		check(Container);
+	}
+};
+
+inline uint32 GetTypeHash(const FPropertyValue& Val)
+{
+	return FCrc::MemCrc32(&Val.Prop, sizeof(Val.Prop)) ^ FCrc::MemCrc32(&Val.Container, sizeof(Val.Container));
+}
+
+inline bool operator==(const FPropertyValue& lhs, const FPropertyValue& rhs)
+{
+	return lhs.Prop == rhs.Prop && lhs.Container == rhs.Container;
+}
+
+inline bool operator!=(const FPropertyValue& lhs, const FPropertyValue& rhs)
+{
+	return false == operator==(lhs, rhs);
+}
 
 class FProtoFieldUtils
 {
