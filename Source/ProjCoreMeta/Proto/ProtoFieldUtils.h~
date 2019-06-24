@@ -94,17 +94,17 @@ public:
 	/**
 	* Returns property value string representation.
 	*/
-	static FString GetPropertyValueString(const UProperty* InProperty, const void* InValue, EPropertyValueStringFlags InFlags = EPropertyValueStringFlags::None);
+	static FString GetPropertyValueString(const UProperty* InProperty, const void* InValue);
 
 	/**
 	* Returns array property value string representation.
 	*/
-	static FString GetArrayPropertyValueString(const UArrayProperty* InProperty, const void* InValue, EPropertyValueStringFlags InFlags = EPropertyValueStringFlags::None);
+	static FString GetArrayPropertyValueString(const UArrayProperty* InProperty, const void* InValue);
 	
 	/**
 	* Returns map property value string representation.
 	*/
-	static FString GetMapPropertyValueString(const UMapProperty* InProperty, const void* InValue, EPropertyValueStringFlags InFlags = EPropertyValueStringFlags::None);
+	static FString GetMapPropertyValueString(const UMapProperty* InProperty, const void* InValue);
 	
 	/**
 	* Returns set property value string representation.

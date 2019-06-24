@@ -67,9 +67,9 @@ FString FProtoFieldUtils::GetPropertyValueString(const UProperty* InProperty, co
 	{
 		return PropAsDelegate->SignatureFunction ? FString(TEXT("SET")) : FString(TEXT("nullptr"));
 	}
-	else if(const UMulticastDelegateProperty* PropAsMultiDelegate = Cast<const UMulticastDelegateProperty>(InProperty))
+	else if(const UMulticastDelegateProperty* PropAsDelegate = Cast<const UMulticastDelegateProperty>(InProperty))
 	{
-		return PropAsMultiDelegate->SignatureFunction ? FString(TEXT("SET")) : FString(TEXT("nullptr"));
+		return PropAsDelegate->SignatureFunction ? FString(TEXT("SET")) : FString(TEXT("nullptr"));
 	}
 	else
 	{
