@@ -4,6 +4,11 @@
 UTestBaseClass::UTestBaseClass()
 {
 	BaseTestInterfaceField.SetObject(NewObject<UMyTestInterfaceInstance>());
+	BaseTestInterfaceFieldToField = BaseTestInterfaceField;
+	BaseTestInterfaceField2.SetObject(NewObject<UMyTestInterfaceInstance>());
+
+	TestObj = UMyTestObject::NewTestObject();
+	TestObjToObj = TestObj;
 }
 
 FString UTestBaseClass::TestNativeCall_Implementation(FName InName) const

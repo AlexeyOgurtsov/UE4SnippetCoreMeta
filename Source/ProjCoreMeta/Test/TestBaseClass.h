@@ -1,6 +1,8 @@
 #pragma once
 
 #include "MyTestInterface.h"
+#include "MyTestObject.h"
+#include "MyTestObjectTwo.h"
 #include "TestBaseClass.generated.h"
 
 class AActor;
@@ -63,6 +65,27 @@ public:
 	UFUNCTION(BlueprintPure, Category = BaseClass)
 	TScriptInterface<IMyTestInterface> GetBaseTestInterfaceField() { return BaseTestInterfaceField; }
 
+	UFUNCTION(BlueprintPure, Category = BaseClass)
+	TScriptInterface<IMyTestInterface> GetBaseTestInterfaceFieldToField() { return BaseTestInterfaceFieldToField; }
+
+	UFUNCTION(BlueprintPure, Category = BaseClass)
+	TScriptInterface<IMyTestInterface> GetBaseTestInterfaceField2() { return BaseTestInterfaceField2; }
+
+	UFUNCTION(BlueprintPure, Category = BaseClass)
+	TScriptInterface<IMyTestInterface> GetBaseTestInterfaceFieldNull() { return BaseTestInterfaceFieldNull; }
+
+	UFUNCTION(BlueprintPure, Category = Objects)
+	UMyTestObject* GetTestObj() const { return TestObj; }
+
+	UFUNCTION(BlueprintPure, Category = Objects)
+	UMyTestObject* GetTestObjToObj() const { return TestObjToObj; }
+
+	UFUNCTION(BlueprintPure, Category = Objects)
+	UMyTestObjectTwo* GetTestObj2() const { return TestObj2; }
+
+	UFUNCTION(BlueprintPure, Category = Objects)
+	UMyTestObject* GetTestObjNull() const { return TestObjNull; }	
+
 private:
 	UPROPERTY(SaveGame)
 	int32 BaseInt32 = 0;
@@ -92,6 +115,27 @@ protected:
 	UPROPERTY(SaveGame, Category = BaseProps, BlueprintReadOnly)
 	AActor* BaseActorField = nullptr;
 
+	UPROPERTY()
+	UMyTestObject* TestObj = nullptr;
+
+	UPROPERTY()
+	UMyTestObject* TestObjToObj = nullptr;
+
+	UPROPERTY()
+	UMyTestObjectTwo* TestObj2 = nullptr;
+
+	UPROPERTY()
+	UMyTestObject* TestObjNull = nullptr;
+
 	UPROPERTY(SaveGame, Category = BaseProps, BlueprintReadOnly)
 	TScriptInterface<IMyTestInterface> BaseTestInterfaceField;
+
+	UPROPERTY(SaveGame, Category = BaseProps, BlueprintReadOnly)
+	TScriptInterface<IMyTestInterface> BaseTestInterfaceField2;
+
+	UPROPERTY(SaveGame, Category = BaseProps, BlueprintReadOnly)
+	TScriptInterface<IMyTestInterface> BaseTestInterfaceFieldToField;
+
+	UPROPERTY(SaveGame, Category = BaseProps, BlueprintReadOnly)
+	TScriptInterface<IMyTestInterface> BaseTestInterfaceFieldNull;
 };

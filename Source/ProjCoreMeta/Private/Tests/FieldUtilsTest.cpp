@@ -81,6 +81,7 @@ namespace FieldUtilsTest
 		// ~Traverse helpers End
 
 		// ~Testee stuff Begin
+		UTestClass* GetTestObject() const { return PropHolder.GetTestClass(); }
 		FTestPropHolder& GetPropHolder() { return PropHolder; }
 		const UClass* GetRootClass() const { return PropHolder.GetRootClass(); }
 		UBoolProperty* GetProp_Bool() const { return PropHolder.GetProp_Bool(); }
@@ -133,11 +134,26 @@ bool FPropertyFieldUtils_TraverseFields_ClassProperty::RunTest(const FString& Pa
 		GetProp_Obj(), &GetPropHolder(), EFieldIterationFlags::IncludeComposite
 	);
 
-	CheckObjectPropertiesIncluded(GetObj());
-	const FTestStruct S = GetStruct();
-	CheckStructPropertiesIncluded(&S);
-	M_TO_BE_IMPL(TEXT("Check interface"));
-	M_TO_BE_IMPL(TEXT("Check many objects"));
+	{
+		CheckObjectPropertiesIncluded(GetTestObject()->GetBaseObjectField());
+		CheckObjectPropertiesIncluded(GetTestObject()->GetBaseActorField());
+		CheckObjectPropertiesIncluded(GetTestObject()->GetTestObj());
+		CheckObjectPropertiesIncluded(GetTestObject()->GetTestObjToObj());
+		CheckObjectPropertiesIncluded(GetTestObject()->GetTestObj2());
+		CheckObjectPropertiesIncluded(GetTestObject()->GetTestObjNull());
+	}
+
+	{
+		const FTestStruct S = GetStruct();
+		CheckStructPropertiesIncluded(&S);
+	}
+
+	{
+		CheckInterfaceObjectPropertiesIncluded(GetTestObject()->GetBaseTestInterfaceField());
+		CheckInterfaceObjectPropertiesIncluded(GetTestObject()->GetBaseTestInterfaceFieldToField());
+		CheckInterfaceObjectPropertiesIncluded(GetTestObject()->GetBaseTestInterfaceField2());
+		CheckInterfaceObjectPropertiesIncluded(GetTestObject()->GetBaseTestInterfaceFieldNull());
+	}
 
 	return true;
 }

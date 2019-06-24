@@ -12,7 +12,7 @@ struct FTestPropHolder
 	void Initialize(UObject* InOuter)
 	{
 		check(InOuter);
-		Prop_Obj = NewObject<UTestClass>(InOuter);
+		TestClassObj = NewObject<UTestClass>(InOuter);
 	}
 
 	const UClass* GetRootClass() const { return UTestClass::StaticClass(); }
@@ -26,7 +26,7 @@ struct FTestPropHolder
 
 	UObjectProperty* GetProp_Obj() const
 	{
-		static const FName PropName(TEXT("Prop_Obj"), FNAME_Find); 
+		static const FName PropName(TEXT("TestClassObj"), FNAME_Find); 
 		return CastChecked<UObjectProperty>(FTestPropHolder::StaticStruct()->FindPropertyByName(PropName)); 
 	}
 
@@ -47,13 +47,13 @@ struct FTestPropHolder
 	}
 
 	bool GetBool() const { return Prop_Bool; }
-	UObject* GetObj() const { return Prop_Obj; }
-	UTestClass* GetTestClass() const { return Prop_Obj; }
+	UObject* GetObj() const { return TestClassObj; }
+	UTestClass* GetTestClass() const { return TestClassObj; }
 
 private:
 	UPROPERTY() 
 	bool Prop_Bool = false;
 
 	UPROPERTY()
-	UTestClass* Prop_Obj = nullptr;
+	UTestClass* TestClassObj = nullptr;
 };
