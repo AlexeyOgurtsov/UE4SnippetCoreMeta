@@ -138,4 +138,22 @@ protected:
 
 	UPROPERTY(SaveGame, Category = BaseProps, BlueprintReadOnly)
 	TScriptInterface<IMyTestInterface> BaseTestInterfaceFieldNull;
+
+	UPROPERTY()
+	TArray<float> FloatArray;
+
+	UPROPERTY()
+	TArray<int> IntArray;
+
+	UPROPERTY()
+	TSet<float> FloatSet;
+
+	UPROPERTY()
+	TSet<int> IntSet;
+
+	UPROPERTY()
+	TMap<FString, float> FloatMap;
+
+	UPROPERTY()
+	TMap<FString, int> IntMap;
 };

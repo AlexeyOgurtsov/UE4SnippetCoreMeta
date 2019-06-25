@@ -1,7 +1,8 @@
 #include "ProtoFieldUtils.h"
 #include "Util/Core/LogUtilLib.h"
+#include "UObject/TextProperty.h"
 
-FString FProtoFieldUtils::GetFieldString(const UField* InField, EFieldStringFlags InFlags)
+FString FProtoFieldUtils::GetFieldString(const UField* const InField, EFieldStringFlags const InFlags)
 {
 	FString Result;
 
@@ -17,7 +18,20 @@ FString FProtoFieldUtils::GetFieldString(const UField* InField, EFieldStringFlag
 	return Result;
 }
 
-FString FProtoFieldUtils::GetPropertyValueString(const UProperty* InProperty, const void* InValue, EPropertyValueStringFlags InFlags)
+void FProtoFieldUtils::LogStructPropertyValues(const UStruct* const InStruct, const void* const InStructValue)
+{
+	for(FPropertyValueIterator Itr { UProperty::StaticClass(), InStruct, InStructValue }; Itr; ++Itr)
+	{
+		LogPropertyValue(Itr.Key(), Itr.Value());
+	}
+}
+
+void FProtoFieldUtils::LogPropertyValue(const UProperty* const InProperty, const void* const InValue, EPropertyValueStringFlags const InFlags)
+{
+	M_LOG(TEXT("{%s} value is {%s}"), *GetFieldString(InProperty), *GetPropertyValueString(InProperty, InValue, InFlags));
+}
+
+FString FProtoFieldUtils::GetPropertyValueString(const UProperty* const InProperty, const void* InValue, EPropertyValueStringFlags const InFlags)
 {
 	if(const UNumericProperty* PropAsNumeric = Cast<const UNumericProperty>(InProperty))
 	{
@@ -29,7 +43,7 @@ FString FProtoFieldUtils::GetPropertyValueString(const UProperty* InProperty, co
 	}
 	else if(const UObjectPropertyBase* PropAsObj = Cast<const UObjectPropertyBase>(InProperty))
 	{
-		return PropAsObj->GetObjectPropertyValue(InValue) ? FString(TEXT("SET")) : FString(TEXT("nullptr"));
+		return ULogUtilLib::GetNameAndClassSafe(PropAsObj->GetObjectPropertyValue(InValue));
 	}
 	else if(const UClassProperty* PropAsClass = Cast<const UClassProperty>(InProperty))
 	{
@@ -37,7 +51,7 @@ FString FProtoFieldUtils::GetPropertyValueString(const UProperty* InProperty, co
 	}
 	else if(const UInterfaceProperty* PropAsInterface = Cast<const UInterfaceProperty>(InProperty))
 	{
-		return PropAsInterface->InterfaceClass ? PropAsInterface->InterfaceClass->GetName() : FString(TEXT("nullptr"));
+		return ULogUtilLib::GetNameAndClassSafe(UInterfaceProperty::GetPropertyValue(InValue).GetObject());
 	}
 	else if(const UNameProperty* PropAsName = Cast<const UNameProperty>(InProperty))
 	{
@@ -71,28 +85,74 @@ FString FProtoFieldUtils::GetPropertyValueString(const UProperty* InProperty, co
 	{
 		return PropAsMultiDelegate->SignatureFunction ? FString(TEXT("SET")) : FString(TEXT("nullptr"));
 	}
+	else if(const UTextProperty* PropAsText = Cast<const UTextProperty>(InProperty))
+	{
+		return UTextProperty::GetPropertyValue(InValue).ToString();
+	}
 	else
 	{
 		return FString(TEXT("{UNKNOWN_PROP_TYPE}"));
 	}
 }
 
-FString FProtoFieldUtils::GetArrayPropertyValueString(const UArrayProperty* InProperty, const void* InValue, EPropertyValueStringFlags InFlags)
+FString FProtoFieldUtils::GetArrayPropertyValueString(const UArrayProperty* const InProperty, const void* const InValue, EPropertyValueStringFlags const InFlags)
 {
-	M_NOT_IMPL_RET(FString{TEXT("{IMPL:ARRAY_AS_STRING}")});
+	check(InProperty);
+	check(InValue);
+	
+	FString S;
+	const FScriptArray* const Arr = UArrayProperty::GetPropertyValuePtr(InValue);
+	if(Arr)
+	{
+		S.Append(FString::Printf(TEXT("Count=%d"), Arr->Num()));
+	}
+	else
+	{
+		S.Append(FString{TEXT("{PropertyValuePtr is nullptr}")});
+	}
+
+	return S;
 }
 
-FString FProtoFieldUtils::GetSetPropertyValueString(const USetProperty* InProperty, const void* InValue, EPropertyValueStringFlags InFlags)
+FString FProtoFieldUtils::GetSetPropertyValueString(const USetProperty* const InProperty, const void* const InValue, EPropertyValueStringFlags const InFlags)
 {
-	M_NOT_IMPL_RET(FString{TEXT("{IMPL:SET_AS_STRING}")});
+	check(InProperty);
+	check(InValue);
+	
+	FString S;
+	const FScriptSet* const Set = USetProperty::GetPropertyValuePtr(InValue);
+	if(Set)
+	{
+		S.Append(FString::Printf(TEXT("Count=%d"), Set->Num()));
+	}
+	else
+	{
+		S.Append(FString{TEXT("{PropertyValuePtr is nullptr}")});
+	}
+
+	return S;
 }
 
-FString FProtoFieldUtils::GetMapPropertyValueString(const UMapProperty* InProperty, const void* InValue, EPropertyValueStringFlags InFlags)
+FString FProtoFieldUtils::GetMapPropertyValueString(const UMapProperty* const InProperty, const void* const InValue, EPropertyValueStringFlags const InFlags)
 {
-	M_NOT_IMPL_RET(FString{TEXT("{IMPL:MAP_AS_STRING}")});
+	check(InProperty);
+	check(InValue);
+	
+	FString S;
+	const FScriptMap* const Map = UMapProperty::GetPropertyValuePtr(InValue);
+	if(Map)
+	{
+		S.Append(FString::Printf(TEXT("Count=%d"), Map->Num()));
+	}
+	else
+	{
+		S.Append(FString{TEXT("{PropertyValuePtr is nullptr}")});
+	}
+
+	return S;
 }
 
-FString FProtoFieldUtils::GetFieldStringSafe(const UField* InField, EFieldStringFlags InFlags)
+FString FProtoFieldUtils::GetFieldStringSafe(const UField* const InField, EFieldStringFlags const InFlags)
 {
 	if(InField == nullptr)
 	{
@@ -100,7 +160,7 @@ FString FProtoFieldUtils::GetFieldStringSafe(const UField* InField, EFieldString
 	}
 	return GetFieldString(InField, InFlags);
 }
-bool FProtoFieldUtils::FindPropertyValue(const TArray<FPropertyValue>& InArray, const UProperty* InProperty, const void *InContainer, int32& OutPropertyValueIndex)
+bool FProtoFieldUtils::FindPropertyValue(const TArray<FPropertyValue>& InArray, const UProperty* const InProperty, const void * const InContainer, int32& OutPropertyValueIndex)
 {
 	check(InProperty);
 	check(InContainer);
@@ -108,7 +168,7 @@ bool FProtoFieldUtils::FindPropertyValue(const TArray<FPropertyValue>& InArray, 
 	return bFound;
 }
 
-UStruct* FProtoFieldUtils::GetStructFromField(UField* InField, const void* InContainer)
+UStruct* FProtoFieldUtils::GetStructFromField(UField* const InField, const void* const InContainer)
 {
 	if(UStruct* Struct = Cast<UStruct>(InField))
 	{
@@ -134,7 +194,7 @@ UStruct* FProtoFieldUtils::GetStructFromField(UField* InField, const void* InCon
 	return nullptr;
 }
 
-bool FProtoFieldUtils::IsRelevantField(UField* InField, EFieldIterationFlags InFlags, ELogFlags InLogFlags)
+bool FProtoFieldUtils::IsRelevantField(UField* const InField, EFieldIterationFlags const InFlags, ELogFlags const InLogFlags)
 {
 	bool const bIncludeComposite = ((InFlags & EFieldIterationFlags::IncludeComposite) != EFieldIterationFlags::None);
 	if(UFunction* FuncField = Cast<UFunction>(InField))
@@ -157,7 +217,7 @@ bool FProtoFieldUtils::IsRelevantField(UField* InField, EFieldIterationFlags InF
 	return true;
 }
 
-TSet<UField*> FProtoFieldUtils::GetFieldsRecursive(const UStruct* const InStruct, ELogFlags InLogFlags, EFieldIterationFlags InFieldIterationFlags)
+TSet<UField*> FProtoFieldUtils::GetFieldsRecursive(const UStruct* const InStruct, ELogFlags const InLogFlags, EFieldIterationFlags const InFieldIterationFlags)
 {
 	M_LOGFUNC_IF_FLAGS(InLogFlags);
 	check(InStruct);

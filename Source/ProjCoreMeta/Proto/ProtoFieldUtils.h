@@ -92,6 +92,16 @@ public:
 	static FString GetFieldStringSafe(const UField* InField, EFieldStringFlags InFlags = EFieldStringFlags::None);
 
 	/**
+	* Logs property values of the given struct.
+	*/
+	static void LogStructPropertyValues(const UStruct* InStruct, const void* InStructValue);
+
+	/**
+	* Logs value of the given property.
+	*/
+	static void LogPropertyValue(const UProperty* const InProperty, const void* const InValue, EPropertyValueStringFlags const InFlags = EPropertyValueStringFlags::None);
+
+	/**
 	* Returns property value string representation.
 	*/
 	static FString GetPropertyValueString(const UProperty* InProperty, const void* InValue, EPropertyValueStringFlags InFlags = EPropertyValueStringFlags::None);
